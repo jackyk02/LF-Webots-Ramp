@@ -389,6 +389,8 @@ PROTO Khepera1 [
         ]
         name "led1"
       }
+      DEF INERTIAL_UNIT InertialUnit {
+      }
       DEF RS232_OUT Emitter {
         name "rs232_out"
         type "serial"

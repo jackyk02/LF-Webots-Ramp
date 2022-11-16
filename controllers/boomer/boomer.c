@@ -3,6 +3,7 @@
 #include <webots/keyboard.h>
 #include <webots/motor.h>
 #include <webots/robot.h>
+#include <webots/inertial_unit.h>
 #include <webots/position_sensor.h>
 #include <webots/compass.h>
 
@@ -55,8 +56,10 @@ void change_manual_steer_angle(double inc) {
 
 int main(int argc, char **argv) {
   wb_robot_init();
-
   time_step = (int)wb_robot_get_basic_time_step();
+  
+  WbDeviceTag imu = wb_robot_get_device("inertial unit");
+  wb_inertial_unit_enable(imu, time_step);
 
   // find wheels
   left_front_wheel = wb_robot_get_device("left wheel motor");
@@ -77,15 +80,34 @@ int main(int argc, char **argv) {
   double right_encoder_offset = 0.0;
   
   while (wb_robot_step(time_step) != -1) {
-    int encoder_value[2];
+    double encoder_value[2];
     encoder_value[0] = ENCODER_UNIT * (wb_position_sensor_get_value(left_position_sensor) - left_encoder_offset);
     encoder_value[1] = ENCODER_UNIT * (wb_position_sensor_get_value(right_position_sensor) - right_encoder_offset);
-
+    const double roll = wb_inertial_unit_get_roll_pitch_yaw(imu)[0]*100;
+    const double pitch = wb_inertial_unit_get_roll_pitch_yaw(imu)[1]*100;
+    const double yaw = wb_inertial_unit_get_roll_pitch_yaw(imu)[2]*100;
     
-    if (encoder_value[0]>=295){
-      wb_motor_set_velocity(left_front_wheel, 0);
+    printf("roll: %f, pitch: %f, yaw: %f \n", roll, pitch, yaw);
+    printf("encode1: %f, encode2: %f \n", encoder_value[0], encoder_value[1]);
+    //encode1: 298, encode2: 303roll: 2.503876, pitch: 30.529904, yaw: -303.518054 
+    if (encoder_value[0]>=298 && encoder_value[1]>=303.39){
+      wb_motor_set_velocity(left_front_wheel, 10);
       wb_motor_set_velocity(right_front_wheel, 10);
-      
+    }
+    
+    else if (encoder_value[0]>=298){
+      wb_motor_set_velocity(left_front_wheel, 0);
+      wb_motor_set_velocity(right_front_wheel, 10); 
+    }
+    //roll: -23.625994, pitch: -6.759791, yaw: 156.173631 
+    else if (roll>=-23.625994 && pitch >= -6.7597 && yaw >= 156.173){
+      wb_motor_set_velocity(left_front_wheel, 10);
+      wb_motor_set_velocity(right_front_wheel, 10);
+    }
+    
+    else if (encoder_value[0]>=295){
+      wb_motor_set_velocity(left_front_wheel, 0);
+      wb_motor_set_velocity(right_front_wheel, 10); 
     }
     else{
       wb_motor_set_velocity(left_front_wheel, speed);
