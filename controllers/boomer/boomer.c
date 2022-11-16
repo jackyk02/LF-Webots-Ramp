@@ -3,16 +3,21 @@
 #include <webots/keyboard.h>
 #include <webots/motor.h>
 #include <webots/robot.h>
+#include <webots/position_sensor.h>
+#include <webots/compass.h>
 
 // to be used as array indices
 enum { X, Y, Z };
 
 // This needs to be changed if the .wbt model changes
 #define FRONT_WHEEL_RADIUS 0.38
+#define ENCODER_UNIT 0.25
 
 // devices
 WbDeviceTag left_steer, right_steer;
 WbDeviceTag left_front_wheel, right_front_wheel;
+WbDeviceTag left_position_sensor, right_position_sensor;
+WbDeviceTag compass;
 
 // misc variables
 int time_step = -1;
@@ -56,20 +61,61 @@ int main(int argc, char **argv) {
   // find wheels
   left_front_wheel = wb_robot_get_device("left wheel motor");
   right_front_wheel = wb_robot_get_device("right wheel motor");
+  
   wb_motor_set_position(left_front_wheel, INFINITY);
   wb_motor_set_position(right_front_wheel, INFINITY);
   wb_motor_set_velocity(left_front_wheel, 3.1);
   wb_motor_set_velocity(right_front_wheel, 3.1);
   printf("You are driving this vehicle!\n");
   
+  //encoder + compass
+  left_position_sensor = wb_robot_get_device("left wheel sensor");
+  right_position_sensor = wb_robot_get_device("right wheel sensor");
+  wb_position_sensor_enable(left_position_sensor, time_step);
+  wb_position_sensor_enable(right_position_sensor, time_step);
+  double left_encoder_offset = 0.0;
+  double right_encoder_offset = 0.0;
+  
   while (wb_robot_step(time_step) != -1) {
-    wb_motor_set_velocity(left_front_wheel, speed);
-    wb_motor_set_velocity(right_front_wheel, speed);
-    speed=speed+1;
-    if(speed>10){
-      speed=10;
+    int encoder_value[2];
+    encoder_value[0] = ENCODER_UNIT * (wb_position_sensor_get_value(left_position_sensor) - left_encoder_offset);
+    encoder_value[1] = ENCODER_UNIT * (wb_position_sensor_get_value(right_position_sensor) - right_encoder_offset);
+
+    
+    if (encoder_value[0]>=295){
+      wb_motor_set_velocity(left_front_wheel, 0);
+      wb_motor_set_velocity(right_front_wheel, 10);
+      
+    }
+    else{
+      wb_motor_set_velocity(left_front_wheel, speed);
+      wb_motor_set_velocity(right_front_wheel, speed);
+      speed=speed+1;
+      if(speed>10){
+        speed=10;
+      }
     }
   }
+  // while (wb_robot_step(time_step) != -1) {
+    // int encoder_value[2];
+    // encoder_value[0] = ENCODER_UNIT * (wb_position_sensor_get_value(left_position_sensor) - left_encoder_offset);
+    // encoder_value[1] = ENCODER_UNIT * (wb_position_sensor_get_value(right_position_sensor) - right_encoder_offset);
+    
+    // printf("%d\n", encoder_value[0]);
+    
+    // if (encoder_value[0]>=295){
+      // wb_motor_set_velocity(left_front_wheel, 0);
+      // wb_motor_set_velocity(right_front_wheel, 0);
+    // }
+    // else{
+      // wb_motor_set_velocity(left_front_wheel, speed);
+      // wb_motor_set_velocity(right_front_wheel, speed);
+      // speed=speed+1;
+      // if(speed>10){
+        // speed=10;
+      // }
+    // }
+  // }
  
   /* get steering motors
   left_steer = wb_robot_get_device("left_steer");
