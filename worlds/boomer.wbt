@@ -1,0 +1,66 @@
+#VRML_SIM R2022b utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2022b/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2022b/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "../protos/Ramp30deg.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2022b/projects/robots/k-team/khepera1/protos/Khepera1.proto"
+
+WorldInfo {
+  info [
+    "Boomer 3050 Tractor"
+  ]
+  title "Boomer 3050 Tractor"
+  ERP 0.7
+  basicTimeStep 20
+  lineScale 1
+  contactProperties [
+    ContactProperties {
+      softCFM 0.0001
+    }
+  ]
+}
+Viewpoint {
+  orientation 0.02470451713799847 0.15956200798150155 -0.9868787425220434 0.6198556037815739
+  position -0.7701833540576961 0.4293900865527501 0.2206611406491401
+  followSmoothness 0
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+DEF FLOOR Solid {
+  children [
+    DEF PLANE_SHAPE Shape {
+      appearance PBRAppearance {
+        baseColorMap ImageTexture {
+          url [
+            "https://raw.githubusercontent.com/cyberbotics/webots/R2022b/projects/default/worlds/textures/dry_grass.jpg"
+          ]
+        }
+        roughness 1
+        metalness 0
+        textureTransform TextureTransform {
+          scale 200 200
+        }
+      }
+      geometry Plane {
+        size 1000 1000
+      }
+      castShadows FALSE
+    }
+  ]
+  boundingObject USE PLANE_SHAPE
+}
+Ramp30deg {
+  translation -0.01 0 -0.06
+  scale 0.15 0.15 0.15
+}
+Khepera1 {
+  hidden position_0_0 1101.8479999909325
+  hidden position_0_1 1101.8479999912695
+  hidden rotation_1 0.6360713111045517 -0.6360714078123839 -0.43683687041424113 2.3178853030533593
+  hidden rotation_2 0.6433927418067958 -0.6433926004902565 -0.41483941643088695 2.3551262176610086
+  translation -0.24486067146293183 -4.097887570100719e-08 0.025161266910138397
+  rotation 1.1234536469890125e-06 -0.9999999999988991 -9.69482168829968e-07 0.30700126287147955
+  controller "boomer"
+}
